@@ -145,7 +145,7 @@ public sealed class DashboardRenderer
                 table.AddRow(
                     indexCell,
                     FormatHistoryCell(slotIndex, item.Timestamp.ToString("HH:mm:ss")),
-                    FormatHistoryCell(slotIndex, $"{ToGb(item.FreeBytes):N2} GB"));
+                    FormatHistoryCell(slotIndex, $"{FreeSpacePrecision.FormatGb(item.FreeBytes)} GB"));
             }
             else {
                 table.AddRow(
@@ -185,7 +185,7 @@ public sealed class DashboardRenderer
 
     private static string FormatFigletGb(long bytes)
     {
-        return ToGb(bytes).ToString("0.##", CultureInfo.InvariantCulture);
+        return FreeSpacePrecision.FormatGb(bytes);
     }
 
     private static string FormatHistoryCell(int slotIndex, string value)

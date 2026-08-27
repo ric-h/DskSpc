@@ -22,7 +22,7 @@ DriveSnapshot? latestSnapshot = null;
 string? latestError = null;
 int historyWindowStart = 1;
 int maxHistoryWindowStart = Math.Max(1, HistoryCapacity - HistoryWindowSize + 1);
-long? lastReadFreeHundredthsGb = null;
+long? lastReadFreeSpaceUnits = null;
 
 AnsiConsole.Clear();
 
@@ -47,16 +47,16 @@ await AnsiConsole.Live(renderer.Render(
                 if (result.IsSuccess && result.Snapshot is not null) {
                     latestSnapshot = result.Snapshot;
                     latestError = null;
-                    long currentFreeHundredthsGb = ToFreeSpaceHundredthsGb(result.Snapshot.FreeBytes);
+                    long currentFreeSpaceUnits = FreeSpacePrecision.ToComparableUnits(result.Snapshot.FreeBytes);
 
-                    bool isFirstSuccessfulRead = lastReadFreeHundredthsGb is null;
-                    bool freeSpaceChanged = !isFirstSuccessfulRead && lastReadFreeHundredthsGb != currentFreeHundredthsGb;
+                    bool isFirstSuccessfulRead = lastReadFreeSpaceUnits is null;
+                    bool freeSpaceChanged = !isFirstSuccessfulRead && lastReadFreeSpaceUnits != currentFreeSpaceUnits;
 
                     if (isFirstSuccessfulRead || freeSpaceChanged) {
                         historyManager.Add(result.Snapshot);
                     }
 
-                    lastReadFreeHundredthsGb = currentFreeHundredthsGb;
+                    lastReadFreeSpaceUnits = currentFreeSpaceUnits;
                 }
                 else {
                     latestError = result.ErrorMessage ?? "Unknown failure while reading drive.";
@@ -123,11 +123,3 @@ static bool TryReadKey(out ConsoleKey key)
     }
 }
 
-static long ToFreeSpaceHundredthsGb(long freeBytes)
-{
-    const long bytesPerGb = 1024L * 1024L * 1024L;
-    decimal freeGb = (decimal)freeBytes / bytesPerGb;
-    decimal hundredthsGb = decimal.Round(freeGb * 100m, 0, MidpointRounding.ToEven);
-
-    return decimal.ToInt64(hundredthsGb);
-}
